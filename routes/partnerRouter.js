@@ -1,59 +1,84 @@
 const express = require('express');
+const Partner = require('../models/partner');
 
 const partnerRouter = express.Router();
 
 partnerRouter
 	.route('/')
-	.all((req, res, next) => {
-		res.statusCode = 200;
-		res.setHeader('Content-Type', 'text/plain');
-		next();
+	.get((req, res, next) => {
+		Partner.find()
+			.then((partners) => {
+				res.statusCode = 200;
+				res.setHeader('Content-Type', 'application/json');
+				res.json(partners);
+			})
+			.catch((err) => next(err));
 	})
-	.get((req, res) => {
-		res.end('Will send all the campsites to you');
-	})
-	.post((req, res) => {
-		res.end(
-			`Will add the campsite: ${req.body.name} with description: ${req.body.description}`
-		);
+	.post((req, res, next) => {
+		Partner.create(req.body)
+			.then((partner) => {
+				console.log('Partners Created ', partner);
+				res.statusCode = 200;
+				res.setHeader('Content-Type', 'application/json');
+				res.json(partner);
+			})
+			.catch((err) => next(err));
 	})
 	.put((req, res) => {
 		res.statusCode = 403;
 		res.end('PUT operation not supported on /campsites');
 	})
-	.delete((req, res) => {
-		res.end('Deleting all campsites');
+	.delete((req, res, next) => {
+		Partner.deleteMany()
+			.then((response) => {
+				res.statusCode = 200;
+				res.setHeader('Content-Type', 'application/json');
+				res.json(response);
+			})
+			.catch((err) => next(err));
 	});
 
 partnerRouter
 	.route('/:partnerId')
-
-	.all((req, res, next) => {
-		res.statusCode = 200;
-		res.setHeader('Content-Type', 'text/plain');
-		next();
-	})
-
-	.get((req, res) => {
-		res.end(
-			`Will send details of the campsite: ${req.params.campsiteId} to you`
-		);
+	.get((req, res, next) => {
+		Partner.findById(req.params.PartnerId)
+			.then((partner) => {
+				res.statusCode = 200;
+				res.setHeader('Content-Type', 'application/json');
+				res.json(partner);
+			})
+			.catch((err) => next(err));
 	})
 
 	.post((req, res) => {
 		res.statusCode = 403;
 		res.end(
-			`POST operation not supported on /campsiteIds/${req.params.campsiteId}to you`
+			`POST operation not supported on /partnerIds/${req.params.partnerId}to you`
 		);
 	})
-	.put((req, res) => {
-		res.write(`Updating the partner:${req.params.campsiteId}\n`);
-		res.end(
-			`Will update the partner: ${req.body.name} with description: ${req.body.description}`
-		);
+	.put((req, res, next) => {
+		Partner.findByIdAndUpdate(
+			req.params.partnerId,
+			{
+				$set: req.body,
+			},
+			{ new: true }
+		)
+			.then((partner) => {
+				res.statusCode = 200;
+				res.setHeader('Content-Type', 'application/json');
+				res.json(partner);
+			})
+			.catch((err) => next(err));
 	})
-	.delete((req, res) => {
-		res.end(`Deleting campsite: ${req.params.campsiteId}`);
+	.delete((req, res, next) => {
+		Partner.findByIdAndDelete(req.params.partnerId)
+			.then((response) => {
+				res.statusCode = 200;
+				res.setHeader('Content-Type', 'application/json');
+				res.json(response);
+			})
+			.catch((err) => next(err));
 	});
 
 module.exports = partnerRouter;
