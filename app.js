@@ -45,6 +45,7 @@ function auth(req, res, next) {
 		err.status = 401;
 		return next(err);
 	}
+
 	const auth = Buffer.from(authHeader.split(' ')[1], 'base64')
 		.toString()
 		.split(':');
@@ -59,12 +60,6 @@ function auth(req, res, next) {
 		return next(err);
 	}
 }
-
-app.use(auth);
-
-const auth = Buffer.from(authHeader.split(' '), [1], 'base64')
-	.toString()
-	.split(':');
 
 app.use(auth);
 
